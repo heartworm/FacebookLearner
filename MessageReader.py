@@ -78,8 +78,8 @@ class MessageReader:
                 out_tensor = torch.cat([out_tensor, new_tensor], 1)
         return out_tensor
 
-    def message_sequence_to_humanreadable(self, msgseq):
+    def message_sequence_to_humanreadable(self, sequence):
         out_str = ""
-        for i in range(msgseq.size()[0]):
-            out_str += self.index_to_humanreadable(onehot_to_index(msgseq[i]))
+        for i in range(sequence.size()[0]):
+            out_str += self.index_to_humanreadable(onehot_to_index(sequence[i]))
         return out_str

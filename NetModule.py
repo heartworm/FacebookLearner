@@ -1,15 +1,6 @@
-from MessageReader import MessageReader
 import torch.nn as nn
-import torch.optim as optim
 from torch.autograd import Variable
 from tensor_utils import *
-from NetModule import NetModule
-import numpy as np
-from pathlib import Path
-import time
-import math
-
-
 # Neural net
 
 class NetModule(nn.Module):
@@ -19,15 +10,18 @@ class NetModule(nn.Module):
         self.input_size = input_size
         self.use_cuda = use_cuda
         self.n_layers = n_layers
-        self.rnn_layers = [nn.LSTMCell(input_size, hidden_size)]
 
+
+        self.rnn_layers = [nn.LSTMCell(input_size, hidden_size)]
         for layer in range(n_layers - 1):
             self.rnn_layers.append(nn.LSTMCell(hidden_size, hidden_size))
-
         self.rnn_layers = nn.ModuleList(self.rnn_layers)
 
         self.linear_output = nn.Linear(hidden_size, input_size)
         self.softmax_output = nn.LogSoftmax()
+
+        if use_cuda:
+            self.cuda()
 
     def forward(self, input, states):
 
