@@ -42,9 +42,9 @@ class MessageReader:
         out_tensor = torch.cat((out_tensor, eom_tensor), 0)
         return out_tensor
 
-    def index_to_humanreadable(self, ind):
+    def index_to_humanreadable(self, ind, newlines=False):
         if ind == (self.n_input_vec - 1):
-            return "<END>\n"
+            return "<END>\n" if newlines else "<END>"
         elif ind < self.n_authors:
             return "<" + self.all_authors[ind] + ">"
         else:
@@ -77,3 +77,9 @@ class MessageReader:
             else:
                 out_tensor = torch.cat([out_tensor, new_tensor], 1)
         return out_tensor
+
+    def message_sequence_to_humanreadable(self, msgseq):
+        out_str = ""
+        for i in range(msgseq.size()[0]):
+            out_str += self.index_to_humanreadable(onehot_to_index(msgseq[i]))
+        return out_str

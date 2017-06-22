@@ -5,45 +5,20 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.autograd import Variable
 from tensor_utils import *
-from Net import Net
+from NetModule import NetModule
 import numpy as np
 from pathlib import Path
+import time
+import math
+
 mr = MessageReader("messages.json")
-
-######################################################################
-# Training
-# =========
-# Preparing for Training
-# ----------------------
-#
-# First of all, helper functions to get random pairs of (category, line):
-#
-
-
-def message_sequence_to_humanreadable(msgseq):
-    out_str = ""
-    for i in range(msgseq.size()[0]):
-        out_str += mr.index_to_humanreadable(onehot_to_index(msgseq[i]))
-    return out_str
 
 use_cuda = torch.cuda.is_available()
 
-######################################################################
-# Training the Network
-# --------------------
-#
-# In contrast to classification, where only the last output is used, we
-# are making a prediction at every step, so we are calculating loss at
-# every step.
-#
-# The magic of autograd allows you to simply sum these losses at each step
-# and call backward at the end.
-#
-
-n_message_batch = 1000 #messages per training epoch
+n_message_batch = 100 #messages per training epoch
 n_parallel_batches = 50 #how many msg sequences of length n_message_batch to compute in parallel
 hidden_nodes = 500
-rnn = Net(mr.n_input_vec, hidden_nodes, use_cuda)
+rnn = NetModule(mr.n_input_vec, hidden_nodes, n_layers=3, use_cuda=use_cuda)
 optimizer = optim.Adam(params=rnn.parameters())
 criterion = nn.NLLLoss()
 
@@ -89,10 +64,6 @@ def train(message_sequence):
 
     return loss.data[0] / message_sequence.size()[0]
 
-
-import time
-import math
-
 def timeSince(since):
     now = time.time()
     s = now - since
@@ -108,12 +79,12 @@ def sample(author, length, probability_based = True, message_text=None):
         sequence_length = message_tensor.size()[0]
         for n in range(sequence_length - 1):
             _, hidden = rnn(Variable(message_tensor[n]), hidden)
-            output_message += mr.index_to_humanreadable(onehot_to_index(message_tensor[n]))
+            output_message += mr.index_to_humanreadable(onehot_to_index(message_tensor[n]), newlines=True)
         input = message_tensor[sequence_length - 1]
     else:
         input = mr.author_tensor(author)
 
-    output_message += mr.index_to_humanreadable(onehot_to_index(input))
+    output_message += mr.index_to_humanreadable(onehot_to_index(input), newlines=True)
 
     for i in range(length):
         output, hidden = rnn(Variable(input), hidden)
@@ -127,7 +98,7 @@ def sample(author, length, probability_based = True, message_text=None):
 
         letter_index = chanced_letter_index if probability_based else max_letter_index
 
-        output_message += mr.index_to_humanreadable(letter_index)
+        output_message += mr.index_to_humanreadable(letter_index, newlines=True)
 
         input = index_to_onehot(letter_index, mr.n_input_vec)
 
@@ -137,7 +108,6 @@ if __name__ == "__main__":
     n_iters = 20000 * 12
     print_every = 100
     save_every = 100
-    all_losses = []
     total_loss = 0 # Reset every plot_every iters
 
     start = time.time()
