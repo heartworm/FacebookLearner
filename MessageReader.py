@@ -11,6 +11,7 @@ class MessageReader:
         self.messages = messages_obj["messages"]
         self.author_name_list = messages_obj["authors"]
         self.all_emails = [author["email"] for author in self.author_name_list]
+        self.all_names = [author["name"] for author in self.author_name_list]
         self.all_letters = messages_obj["letters"]
         self.n_messages = len(self.messages)
         self.n_letters = len(self.all_letters)
