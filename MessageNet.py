@@ -56,35 +56,47 @@ class MessageNet:
 
         return loss.data[0] / message_sequence.size()[0]
 
-    def sample(self, author, length, probability_based=True, message_text=None, newlines=True):
-        hidden = self.net.init_state(1)
-        output_message = ""
-        if message_text is not None:
-            message_tensor = self.mr.message_tensor({"author": author, "message": message_text})
+    def sample(self, message, length, probability_based=True, continuous=False, hidden=None):
+
+        # For continuous chats context is persistent and will be passed in to the function
+        if hidden is None:
+            hidden = self.net.init_state(1)
+
+        index_list = []
+
+        if message["message"] is not None:
+            message_tensor = self.mr.message_sequence(message)
             sequence_length = message_tensor.size()[0]
             for n in range(sequence_length - 1):
                 _, hidden = self.net(Variable(message_tensor[n]), hidden)
-                output_message += self.mr.index_to_humanreadable(onehot_to_index(message_tensor[n]), newlines=newlines)
             input = message_tensor[sequence_length - 1]
         else:
-            input = self.mr.author_tensor(author)
+            author_ind = self.mr.author_index(message["email"])
+            input = index_to_onehot(author_ind, self.mr.n_input_vec)
+            index_list.append(author_ind)
 
-        output_message += self.mr.index_to_humanreadable(onehot_to_index(input), newlines=True)
+
 
         for i in range(length):
             output, hidden = self.net(Variable(input), hidden)
 
             output_exped = torch.exp(output.data)
             output_exped_np = output_exped.cpu().view(-1).numpy()
-            chanced_letter_index = np.random.choice(self.mr.n_input_vec, p=output_exped_np)
 
-            _, max_letter_index = torch.max(output_exped, 1)
-            max_letter_index = max_letter_index[0][0]
+            # Using output_exped as probability distribution, choose a random letter index
+            chanced_index = np.random.choice(self.mr.n_input_vec, p=output_exped_np)
 
-            letter_index = chanced_letter_index if probability_based else max_letter_index
+            # Select a letter index using argmax, this can result in screwed up things like endless "hahahahahahaha...."
+            _, max_index = torch.max(output_exped, 1)
+            max_index = max_index[0][0]
 
-            output_message += self.mr.index_to_humanreadable(letter_index, newlines=True)
+            letter_index = chanced_index if probability_based else max_index
+            index_list.append(letter_index)
 
             input = index_to_onehot(letter_index, self.mr.n_input_vec)
 
-        return output_message
+            if not continuous and letter_index == self.mr.end_index:
+                break
+
+        return index_list, hidden
+

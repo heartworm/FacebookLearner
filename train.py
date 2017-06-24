@@ -6,7 +6,7 @@ import numpy as np
 import time
 import math
 
-mr = MessageReader("messages.json")
+mr = MessageReader("new_messages.json")
 net = MessageNet(mr)
 
 if net.load_state():
@@ -38,7 +38,9 @@ if __name__ == "__main__":
 
         if iter % print_every == 0:
             print('%s (%d %d%%) %.4f' % (timeSince(start), iter, iter / n_iters * 100, loss))
-            print(net.sample(np.random.choice(mr.all_authors), 50, newlines=False))
+            random_author_input = {"email": np.random.choice(mr.all_emails), "message": None}
+            index_sequence, _ = net.sample(random_author_input, 50, continuous=True)
+            print("".join( [mr.index_to_humanreadable(ind) for ind in index_sequence] ))
 
         if iter % save_every == 0:
             print("Saving state...")

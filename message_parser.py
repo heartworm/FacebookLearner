@@ -14,7 +14,7 @@ whitespace_pattern = re.compile(r"\s+")
 
 messages = []
 current_message_id = ""
-authors = {}
+emails = []
 
 def sanitize_string(str_in):
     str_in = str_in.lower() # Change all characters to lowercase
@@ -38,23 +38,23 @@ if __name__ == "__main__":
                         # To serve as a reference to the next message, facebook duplicates messages across XHR requests.
                         continue
                     current_message_id = message_id
-                    author = action["author_email"]
+                    email = action["author_email"]
                     if action["action_type"] != "ma-type:user-generated-message":
                         # This could be expanded to support stickers, likes, group name changes etc.
                         continue
-                    if author not in authors:
+                    if email not in emails:
                         # Give authors fake names, to be corrected in the output file.
-                        authors[author] = "human" + str(len(authors))
+                        emails.append(email)
                     if "body" in action:
                         out_message = sanitize_string(action["body"])
                         # If the string was in chinese for example, out_message would be blank.
                         if out_message is not None and out_message != "":
                             messages.append({
-                                "author": authors[author],
+                                "email": email,
                                 "message": out_message
                             })
         json.dump({
-            "authors": authors,
+            "authors": [{"email": email, "name": "human"} for email in emails],
             "letters": all_letters,
             "messages": messages
         }, out_file, indent='  ')
