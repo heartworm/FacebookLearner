@@ -56,26 +56,30 @@ class MessageNet:
 
         return loss.data[0] / message_sequence.size()[0]
 
-    def sample(self, message, length, probability_based=True, continuous=False, hidden=None):
+    def message_to_index_sequence(self):
+        pass
 
+    def sample_message(self, message, length, **kwargs):
+        return self.sample(self.mr.message_index_sequence(message), length, **kwargs)
+
+    def sample_author(self, email, length, **kwargs):
+        init_sequence = [self.mr.author_index(email)]
+        output, hidden = self.sample(init_sequence, length, **kwargs)
+        return init_sequence + output, hidden
+
+
+    def sample(self, index_sequence, length, probability_based=True, continuous=False, hidden=None):
         # For continuous chats context is persistent and will be passed in to the function
         if hidden is None:
             hidden = self.net.init_state(1)
 
-        index_list = []
+        for ind in index_sequence[:-1]:
+            input = index_to_onehot(ind, self.mr.n_input_vec)
+            _, hidden = self.net(Variable(input), hidden)
 
-        if message["message"] is not None:
-            message_tensor = self.mr.message_sequence(message)
-            sequence_length = message_tensor.size()[0]
-            for n in range(sequence_length - 1):
-                _, hidden = self.net(Variable(message_tensor[n]), hidden)
-            input = message_tensor[sequence_length - 1]
-        else:
-            author_ind = self.mr.author_index(message["email"])
-            input = index_to_onehot(author_ind, self.mr.n_input_vec)
-            index_list.append(author_ind)
+        input = index_to_onehot(index_sequence[-1], self.mr.n_input_vec)
 
-
+        output_sequence = []
 
         for i in range(length):
             output, hidden = self.net(Variable(input), hidden)
@@ -91,12 +95,12 @@ class MessageNet:
             max_index = max_index[0][0]
 
             letter_index = chanced_index if probability_based else max_index
-            index_list.append(letter_index)
+            output_sequence.append(letter_index)
 
             input = index_to_onehot(letter_index, self.mr.n_input_vec)
 
             if not continuous and letter_index == self.mr.end_index:
                 break
 
-        return index_list, hidden
+        return output_sequence, hidden
 

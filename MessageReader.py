@@ -32,17 +32,23 @@ class MessageReader:
             raise e
         return self.n_authors + ind
 
-    def message_sequence(self, message):
-        author = index_to_onehot(self.author_index(message["email"]), self.n_input_vec)
-        message = message["message"]
-        eom_tensor = torch.unsqueeze(index_to_onehot(self.n_input_vec - 1, self.n_input_vec), 0)
+    def message_index_sequence(self, message):
+        sequence = [self.author_index(message["email"])]
+        sequence += [self.character_index(char) for char in message["message"]]
+        sequence.append(self.end_index)
+        return sequence
 
-        out_tensor = torch.unsqueeze(author, 0)
-        for char in message:
-            char_unsqueezed = torch.unsqueeze(index_to_onehot(self.character_index(char), self.n_input_vec), 0)
-            out_tensor = torch.cat((out_tensor, char_unsqueezed), 0)
-        out_tensor = torch.cat((out_tensor, eom_tensor), 0)
-        return out_tensor
+    # def message_sequence(self, message):
+    #     author = index_to_onehot(self.author_index(message["email"]), self.n_input_vec)
+    #     message = message["message"]
+    #     eom_tensor = torch.unsqueeze(index_to_onehot(self.n_input_vec - 1, self.n_input_vec), 0)
+    #
+    #     out_tensor = torch.unsqueeze(author, 0)
+    #     for char in message:
+    #         char_unsqueezed = torch.unsqueeze(index_to_onehot(self.character_index(char), self.n_input_vec), 0)
+    #         out_tensor = torch.cat((out_tensor, char_unsqueezed), 0)
+    #     out_tensor = torch.cat((out_tensor, eom_tensor), 0)
+    #     return out_tensor
 
     def index_sequence_to_messages(self, index_sequence):
         in_message = False
@@ -73,6 +79,9 @@ class MessageReader:
 
         return messages
 
+    def message_to_index_sequence(self, message):
+        pass
+
     def index_to_humanreadable(self, ind, newlines=False):
         if ind == (self.n_input_vec - 1):
             return "<END>\n" if newlines else "<END>"
@@ -86,7 +95,7 @@ class MessageReader:
         out_tensor = None
         cur_len = 0
         while cur_len < length:
-            msg_tensor = self.message_sequence(self.messages[ind])
+            msg_tensor = index_sequence_to_onehot_sequence(self.message_index_sequence(self.messages[ind]))
             cur_len += msg_tensor.size()[0]
             if out_tensor is None:
                 out_tensor = msg_tensor
