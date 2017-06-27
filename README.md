@@ -28,7 +28,7 @@ The program expects `messages.json` to be a file that conforms to the following 
      which can only be    comprised of characters in `letters`. 
 ```json
 {
-  "letters": "abcdefghijklmnopqrstuvwxyz0123456789 ",
+  "letters": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ",
   "authors": [
     {"email": "some@unique.string", "name": "alice"},
     {"email": "bobisthebest@gmail.com", "name": "bob"}
@@ -54,4 +54,4 @@ The program expects `messages.json` to be a file that conforms to the following 
 The following is output from a very large Facebook chat I trained on, with a short sequence length on a bad GPU. It
 basically disregards previous message context, but mannerisms of each person (anonymized) are captured fairly well.
 Chat participation rates are also fairly faithfully reflected.
-!(Sample Output)[http://i.imgur.com/jWxrJ9f.png]
+![Sample Output](http://i.imgur.com/jWxrJ9f.png)
