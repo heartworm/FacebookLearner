@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function, division
-from MessageReader import MessageReader
-from MessageNet import MessageNet
-import numpy as np
-import time
 import math
+import time
+
+import numpy as np
+
+from utils.MessageNet import MessageNet
+from utils.MessageReader import MessageReader
 
 mr = MessageReader("messages.json")
 net = MessageNet(mr)

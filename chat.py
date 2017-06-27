@@ -1,6 +1,7 @@
-from MessageReader import MessageReader
-from MessageNet import MessageNet
 import tkinter as tk
+
+from utils.MessageNet import MessageNet
+from utils.MessageReader import MessageReader
 
 
 class ChatGUI:

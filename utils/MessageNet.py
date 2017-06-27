@@ -1,9 +1,11 @@
-from NetModule import NetModule
 from pathlib import Path
-from tensor_utils import *
-from torch.autograd import Variable
+
 import numpy as np
-import torch
+from torch.autograd import Variable
+
+from .NetModule import NetModule
+from .tensor_utils import *
+
 
 class MessageNet:
     def __init__(self, mr, net_path="net.dat", optimizer_path="optimizer.dat"):

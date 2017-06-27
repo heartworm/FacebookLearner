@@ -1,6 +1,9 @@
 import torch.nn as nn
 from torch.autograd import Variable
-from tensor_utils import *
+
+from .tensor_utils import *
+
+
 # Neural net
 
 class NetModule(nn.Module):

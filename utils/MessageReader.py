@@ -1,6 +1,8 @@
 import json
-from tensor_utils import *
 import random
+
+from .tensor_utils import *
+
 
 class MessageReader:
     def __init__(self, file_name):
@@ -80,7 +82,7 @@ class MessageReader:
         out_tensor = None
         cur_len = 0
         while cur_len < length:
-            msg_tensor = index_sequence_to_onehot_sequence(self.message_index_sequence(self.messages[ind]))
+            msg_tensor = index_sequence_to_onehot_sequence(self.message_index_sequence(self.messages[ind]), self.n_input_vec)
             cur_len += msg_tensor.size()[0]
             if out_tensor is None:
                 out_tensor = msg_tensor

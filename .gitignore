@@ -2,3 +2,4 @@
 *.json
 *.7z
 /out.txt
+/.idea
