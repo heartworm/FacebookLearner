@@ -6,7 +6,7 @@ import numpy as np
 import time
 import math
 
-mr = MessageReader("new_messages.json")
+mr = MessageReader("messages.json")
 net = MessageNet(mr)
 
 if net.load_state():
@@ -14,8 +14,8 @@ if net.load_state():
 else:
     print("Didn't find saved state :(")
 
-n_sequence_length = 100 #messages per training epoch
-n_batches = 50 #how many msg sequences of length n_message_batch to compute in parallel
+n_sequence_length = 100 #characters per message sequence
+n_batches = 50 #how many msg sequences to train on in parallel
 
 def timeSince(since):
     now = time.time()
@@ -28,18 +28,16 @@ if __name__ == "__main__":
     n_iters = 20000 * 12
     print_every = 100
     save_every = 100
-    total_loss = 0 # Reset every plot_every iters
 
     start = time.time()
 
     for iter in range(1, n_iters + 1):
         loss = net.train(n_sequence_length, n_batches)
-        total_loss += loss
 
         if iter % print_every == 0:
             print('%s (%d %d%%) %.4f' % (timeSince(start), iter, iter / n_iters * 100, loss))
-            random_author_input = {"email": np.random.choice(mr.all_emails), "message": None}
-            index_sequence, _ = net.sample(random_author_input, 50, continuous=True)
+            random_email = np.random.choice(mr.all_emails)
+            index_sequence, _ = net.sample_author(random_email, 50, continuous=True)
             print("".join( [mr.index_to_humanreadable(ind) for ind in index_sequence] ))
 
         if iter % save_every == 0:

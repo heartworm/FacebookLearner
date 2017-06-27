@@ -56,9 +56,6 @@ class MessageNet:
 
         return loss.data[0] / message_sequence.size()[0]
 
-    def message_to_index_sequence(self):
-        pass
-
     def sample_message(self, message, length, **kwargs):
         return self.sample(self.mr.message_index_sequence(message), length, **kwargs)
 
@@ -69,20 +66,20 @@ class MessageNet:
 
 
     def sample(self, index_sequence, length, probability_based=True, continuous=False, hidden=None):
-        # For continuous chats context is persistent and will be passed in to the function
+        # For continuous chats context (hidden state) is persistent and will be passed in to the function
         if hidden is None:
             hidden = self.net.init_state(1)
 
         for ind in index_sequence[:-1]:
-            input = index_to_onehot(ind, self.mr.n_input_vec)
-            _, hidden = self.net(Variable(input), hidden)
+            input_vec = index_to_onehot(ind, self.mr.n_input_vec)
+            _, hidden = self.net(Variable(input_vec), hidden)
 
-        input = index_to_onehot(index_sequence[-1], self.mr.n_input_vec)
+        input_vec = index_to_onehot(index_sequence[-1], self.mr.n_input_vec)
 
         output_sequence = []
 
         for i in range(length):
-            output, hidden = self.net(Variable(input), hidden)
+            output, hidden = self.net(Variable(input_vec), hidden)
 
             output_exped = torch.exp(output.data)
             output_exped_np = output_exped.cpu().view(-1).numpy()
@@ -91,14 +88,16 @@ class MessageNet:
             chanced_index = np.random.choice(self.mr.n_input_vec, p=output_exped_np)
 
             # Select a letter index using argmax, this can result in screwed up things like endless "hahahahahahaha...."
-            _, max_index = torch.max(output_exped, 1)
-            max_index = max_index[0][0]
+            # _, max_index = torch.max(output_exped, 1)
+            # max_index = max_index[0][0]
+            max_index = onehot_to_index(output_exped)
 
             letter_index = chanced_index if probability_based else max_index
             output_sequence.append(letter_index)
 
-            input = index_to_onehot(letter_index, self.mr.n_input_vec)
+            input_vec = index_to_onehot(letter_index, self.mr.n_input_vec)
 
+            # for training output, don't stop at one message
             if not continuous and letter_index == self.mr.end_index:
                 break
 

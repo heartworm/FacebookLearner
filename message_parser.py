@@ -3,7 +3,7 @@ import json
 import re
 import os
 
-search_path = "~/messages/" #path with json files output by facebook_dumper.py with trailing slash
+search_path = "~/messages/" #path with json files output by facebook_dumper.py with trailing '/'
 
 file_list = glob.glob(search_path + "*.json")
 file_list.sort(reverse=True, key=lambda f: int(f[:f.find("-")])) # Expects file names of the form <int>-<int>.json

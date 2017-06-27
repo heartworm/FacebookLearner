@@ -38,18 +38,6 @@ class MessageReader:
         sequence.append(self.end_index)
         return sequence
 
-    # def message_sequence(self, message):
-    #     author = index_to_onehot(self.author_index(message["email"]), self.n_input_vec)
-    #     message = message["message"]
-    #     eom_tensor = torch.unsqueeze(index_to_onehot(self.n_input_vec - 1, self.n_input_vec), 0)
-    #
-    #     out_tensor = torch.unsqueeze(author, 0)
-    #     for char in message:
-    #         char_unsqueezed = torch.unsqueeze(index_to_onehot(self.character_index(char), self.n_input_vec), 0)
-    #         out_tensor = torch.cat((out_tensor, char_unsqueezed), 0)
-    #     out_tensor = torch.cat((out_tensor, eom_tensor), 0)
-    #     return out_tensor
-
     def index_sequence_to_messages(self, index_sequence):
         in_message = False
         current_message = ""
@@ -78,9 +66,6 @@ class MessageReader:
             })
 
         return messages
-
-    def message_to_index_sequence(self, message):
-        pass
 
     def index_to_humanreadable(self, ind, newlines=False):
         if ind == (self.n_input_vec - 1):

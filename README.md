@@ -11,18 +11,21 @@ The program expects `messages.json` to be a file that conforms to the following 
 ```json
 {
   "letters": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ",
-  "authors":["alice", "bob"],
+  "authors": [
+    {"email": "some@unique.string", "name": "alice"},
+    {"email": "bobisthebest@gmail.com", "name": "bob"}
+  ],
   "messages": [
     {
-      "author": "alice",
+      "email": "some@unique.string",
       "message": "Hi bob here s my public key"
     },
     {
-      "author": "bob",
+      "email": "bobisthebest@gmail.com",
       "message": "fuck you alice im sick of your shit"
     },
     {
-      "author": "alice",
+      "email": "some@unique.string",
       "message": "REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
     }
   ]

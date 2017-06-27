@@ -1,3 +1,4 @@
 *.dat
 *.json
 *.7z
+/out.txt
