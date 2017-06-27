@@ -24,8 +24,8 @@ The program expects `messages.json` to be a file that conforms to the following 
 + `letters` is a string containing all characters present within messages (to build the input vector to the network)
 + `authors` is an array containing a unique identifier (`email`) and a human friendly name for each group chat participant,
 + `messages` is an array containing message objects.
-+ Each message object contains an `author`, which must be present in `authors`, and also a `message`,
-     which can only be    comprised of characters in `letters`. 
++ Each message object contains an `email`, which must be present in `authors`, and also a `message`,
+     which can only be comprised of characters in `letters`.
 ```json
 {
   "letters": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ",
@@ -55,3 +55,9 @@ The following is output from a very large Facebook chat I trained on, with a sho
 basically disregards previous message context, but mannerisms of each person (anonymized) are captured fairly well.
 Chat participation rates are also fairly faithfully reflected.
 ![Sample Output](http://i.imgur.com/jWxrJ9f.png)
+
+### TODO
++ Use a network with a large vocabulary [like this google seq2seq network](https://arxiv.org/pdf/1506.05869v1.pdf)
+    instead of at the character level.
++ Train on a better computer to see the effect of larger sequence length (will it learn to use contextual words)
++ Try overfitting on shorter chats.
